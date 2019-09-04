@@ -1,0 +1,169 @@
+#!/bin/bash
+
+#
+# This is almanac, a small personal loggind script for linux systems.
+# I made this for my own personal use so i could have a lightweight CLI 
+# tool to quicky jot down progress on projects. If you find it usefull
+# that is good too.
+#
+
+# 
+# Print the help to the screen
+#
+print_help() {
+    echo -e "Logging utility for simple life logging."
+    echo -e "The config file is in ~/.almanac.d/config"
+    echo -e "Currently you can only set the default subject in the config file, it defaults to personal\n"
+    echo -e "Adding to the log:"
+    echo -e "Create a log entry with the default subject"
+    echo -e "      almanac -m \"this is the message to log\""
+    echo -e "Create an entry with an associated subject."
+    echo -e "      almanac -s subject -m \"this is the message\"\n"
+    echo -e "Displaying the log:"
+    echo -e "Display the whole log with"
+    echo -e "      almanac -A"
+    echo -e "Display all entries with a given subject with"
+    echo -e "      almanac -S subject"
+    echo -e "You can also search with year and month. To get all entries with the subject of work in august 2019 do"
+    echo -e "      almanac -S work -M 08 -Y 19"
+}
+
+#
+# Input a line into the log file
+#
+input_log() {
+    if [ -z ${SUBJECT} ]; then 
+        echo -e "$ENTRY_DATE ($DEFAULT_SUBJECT) $MESSAGE" >> $LOG_FILE
+    else 
+        echo -e "$ENTRY_DATE ($SUBJECT) $MESSAGE" >> $LOG_FILE
+    
+        if ! grep -q $SUBJECT $TAG_FILE; then
+            echo $SUBJECT >> $TAG_FILE
+        fi
+    fi
+}
+
+#
+# If the search file does not exist then create it with the contents of the log
+#
+init_searchfile() {
+    if [ ! -f $SEARCH_FILE ]; then
+        cp $LOG_FILE $SEARCH_FILE
+    fi
+}
+
+#
+# Variable declarations
+#
+DATA_DIR=$HOME"/.almanac.d"
+LOG_FILE=$DATA_DIR"/log"
+CONFIG_FILE=$DATA_DIR"/config"
+SEARCH_FILE=$DATA_DIR"/search"
+TAG_FILE=$DATA_DIR"/tags"
+TEMP_FILE=$DATA_DIR"/temp"
+ENTRY_DATE=`date +"%d%m%y%H%M%S"`
+
+#
+# Create the logger directory if it does not already exist
+#
+mkdir -p $DATA_DIR
+
+if [ ! -f $CONFIG_FILE ]; then
+    echo "DEFAULT_SUBJECT=\"personal\"" >> $CONFIG_FILE
+fi
+
+#
+# Load the config file
+#
+. $CONFIG_FILE
+
+if [ ! -f $LOG_FILE ]; then
+    touch $LOG_FILE
+fi
+
+if [ ! -f $TAG_FILE ]; then
+    echo $DEFAULT_SUBJECT >> $TAG_FILE
+fi
+
+#
+# Parse the command line arguments
+#
+for i in "$@"
+do
+key=$1
+
+case $key in
+    -m|--message)
+        MESSAGE="$2"
+        shift # past argument
+        shift # past value
+    ;;
+        -s|--subject)
+        SUBJECT="$2" 
+        shift # past argument
+        shift # past value
+    ;;
+        -h|--help)
+        print_help
+        shift # past argument
+    ;;
+        -S|--search-subject)
+        STERM="$2"
+        init_searchfile
+        grep --color -E '\('$STERM'\)' $SEARCH_FILE > $TEMP_FILE
+        rm $SEARCH_FILE
+        mv $TEMP_FILE $SEARCH_FILE
+        shift # past arg
+        shift # past value
+    ;;
+        -Y|--search-year)
+        YTERM="$2"
+        init_searchfile
+        grep --color -E '[0-9]{4}'$YTERM'[0-9]{6}' $SEARCH_FILE > $TEMP_FILE
+        rm $SEARCH_FILE
+        mv $TEMP_FILE $SEARCH_FILE
+        shift # past arg
+        shift # past value
+    ;;
+        -M|--search-month)
+        MTERM="$2"
+        init_searchfile
+        grep --color -E '[0-9]{2}'$MTERM'[0-9]{8}' $SEARCH_FILE > $TEMP_FILE
+        rm $SEARCH_FILE
+        mv $TEMP_FILE $SEARCH_FILE
+        shift # past arg
+        shift # past value
+    ;;
+        -A|--list-all)
+        grep --color -E '[0-9]{12}' $LOG_FILE
+        shift
+    ;;
+        -T|--tags)
+        cat $TAG_FILE
+        shift
+        ;;
+    --default)
+        DEFAULT=YES
+        shift # past argument with no value
+    ;;
+    *)
+        # unknown option
+    ;;
+esac
+done
+
+if [ -f $SEARCH_FILE ]; then 
+    grep --color -E '[0-9]{12}' $SEARCH_FILE
+    rm $SEARCH_FILE
+fi
+
+if [ -f $TEMP_FILE ]; then 
+    rm $TEMP_FILE
+fi
+
+
+if [ -z "$MESSAGE" ]; then
+    exit 0
+else
+    input_log
+fi
