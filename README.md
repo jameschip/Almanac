@@ -8,6 +8,7 @@ Entries can be added to the almanac and are date/time stamped with when they wer
 # Install
 
 * Clone this repo.
+* chmod +x almanac
 * Copy _almanac_ to a location in your path.
 * Log things and enjoy.
 
@@ -51,4 +52,8 @@ Will display all of the entries in 2019 with the work tag.
 ### Display used tags
 ```
 almanac -T
+```
+### Display the number of posts for each tag
+```
+almanac -C
 ```
