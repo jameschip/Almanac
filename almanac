@@ -62,7 +62,7 @@ count_tags() {
         num= grep -o '('$line')' $LOG_FILE | wc -l | tr '\n' '\0' 
         echo "${num} $line"
     done < $TAG_FILE
-    printf "\nTotal entires: "
+    printf "\nTotal entries: "
     < $LOG_FILE wc -l 
 }
 
