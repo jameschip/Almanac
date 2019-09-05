@@ -53,6 +53,20 @@ init_searchfile() {
 }
 
 #
+# Counts the number posts for each tag and diplays this information
+# Also displays the total number of entries
+#
+count_tags() {
+    printf "\n"
+    while IFS= read -r line; do
+        num= grep -o '('$line')' $LOG_FILE | wc -l | tr '\n' '\0' 
+        echo "${num} $line"
+    done < $TAG_FILE
+    printf "\nTotal entires: "
+    < $LOG_FILE wc -l 
+}
+
+#
 # Variable declarations
 #
 DATA_DIR=$HOME"/.almanac.d"
@@ -63,11 +77,15 @@ TAG_FILE=$DATA_DIR"/tags"
 TEMP_FILE=$DATA_DIR"/temp"
 ENTRY_DATE=`date +"%d%m%y%H%M%S"`
 
+
 #
 # Create the logger directory if it does not already exist
 #
 mkdir -p $DATA_DIR
 
+#
+# Make a default settings file if not existing
+#
 if [ ! -f $CONFIG_FILE ]; then
     echo "DEFAULT_SUBJECT=\"personal\"" >> $CONFIG_FILE
 fi
@@ -77,10 +95,16 @@ fi
 #
 . $CONFIG_FILE
 
+#
+# Create the log file if one does not exist
+#
 if [ ! -f $LOG_FILE ]; then
     touch $LOG_FILE
 fi
 
+#
+# Create the tag file if one does not exist
+#
 if [ ! -f $TAG_FILE ]; then
     echo $DEFAULT_SUBJECT >> $TAG_FILE
 fi
@@ -141,7 +165,11 @@ case $key in
         -T|--tags)
         cat $TAG_FILE
         shift
-        ;;
+    ;;
+        -C|--count-tags)
+        count_tags
+        shift
+    ;;
     --default)
         DEFAULT=YES
         shift # past argument with no value
@@ -152,16 +180,24 @@ case $key in
 esac
 done
 
+#
+# If a search file exists display it and then remove it
+#
 if [ -f $SEARCH_FILE ]; then 
     grep --color -E '[0-9]{12}' $SEARCH_FILE
     rm $SEARCH_FILE
 fi
 
+#
+# Remove a loftover temp file if it exists
+#
 if [ -f $TEMP_FILE ]; then 
     rm $TEMP_FILE
 fi
 
-
+#
+# Set a message if one has been input
+#
 if [ -z "$MESSAGE" ]; then
     exit 0
 else
