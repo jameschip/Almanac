@@ -57,3 +57,17 @@ almanac -T
 ```
 almanac -C
 ```
+
+### Display the last entry inserted into the almanac
+```
+almanac -l
+```
+
+### Remove an entry from the almanac
+```
+almanac --remove-entry <the long number at the start of the entry goes here>
+```
+Note that this has the ability to remove MANY entries from the almanac at once, it works by regex matching the number at the start of the entry. If you put 010119 then any entries with a number that starts 010119 will be permenantly removed from the log. THIS CAN NOT BE UNDONE SO IF YOU REMOVE THINGS YOU WANT TO KEEP ITS ON YOU! This command will print out the entries that will be removed and ask you if you really want to proceed. you have to input y or Y to proceed otherwise the log stays untouched.
+
+
+```
