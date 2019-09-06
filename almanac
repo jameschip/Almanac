@@ -170,6 +170,10 @@ case $key in
         count_tags
         shift
     ;;
+	-l|--last-entry)
+	awk '/./{line=$0} END{print line}' $LOG_FILE | grep --color -E '[0-9]{12}'
+	shift
+    ;;
     --default)
         DEFAULT=YES
         shift # past argument with no value
