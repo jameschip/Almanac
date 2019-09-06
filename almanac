@@ -76,7 +76,7 @@ SEARCH_FILE=$DATA_DIR"/search"
 TAG_FILE=$DATA_DIR"/tags"
 TEMP_FILE=$DATA_DIR"/temp"
 ENTRY_DATE=`date +"%d%m%y%H%M%S"`
-
+REMOVE_FILE=$DATA_DIR"/rfile"
 
 #
 # Create the logger directory if it does not already exist
@@ -173,6 +173,24 @@ case $key in
 	-l|--last-entry)
 	awk '/./{line=$0} END{print line}' $LOG_FILE | grep --color -E '[0-9]{12}'
 	shift
+    ;;
+	--remove-entry)
+        RPATTERN="$2"
+	grep --color "^$RPATTERN" $LOG_FILE
+        read -p "Really remove these from the log? [y/N] " choice
+	case "$choice" in
+	    y|Y)
+		grep -v "^$RPATTERN" $LOG_FILE > $REMOVE_FILE
+                rm $LOG_FILE
+                mv $REMOVE_FILE $LOG_FILE
+		echo "Even though it is removed from the almanac, it remains part of your life."
+            ;;
+	    *)
+		echo "A wise choice. There are no mistakes in the almanac, just lessons."
+	    ;;
+        esac
+	shift # past argument
+        shift # past value
     ;;
     --default)
         DEFAULT=YES
