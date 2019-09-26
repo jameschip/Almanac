@@ -39,15 +39,16 @@ almanac -S work
 This will display any entries in the almanac for the given tag.
 
 ### Display entries by date
-The -Y and -M tags display entries from the given year or month respectivley. They can be combined like so.
+The -D -Y and -M tags display entries from the given day, year or month respectivley. They can be combined like so.
 ```
-almanac -M 1 -Y 19
+almanac -D 01 -M 01 -Y 19
 ```
-This will display all of the entries for January 2019. These can also be combined with a tag search:
+This will display all of the entries for the 1st of January 2019. These can also be combined with a tag search:
 ``` 
 almanac -S work -Y 19
 ```
-Will display all of the entries in 2019 with the work tag.
+Will display all of the entries in 2019 with the work tag. Note that all of the date searches require 2 digit inputs  
+e.g. you will need to input 01 instear of just 1
 
 ### Display used tags
 ```

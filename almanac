@@ -158,6 +158,15 @@ case $key in
         shift # past arg
         shift # past value
     ;;
+        -D|--search-day)
+        DTERM="$2"
+        init_searchfile
+        grep --color -E $DTERM'[0-9]{10}' $SEARCH_FILE > $TEMP_FILE
+        rm $SEARCH_FILE                                                                                               
+        mv $TEMP_FILE $SEARCH_FILE                                                                                    
+        shift # past arg                                                                                              
+        shift # past value 
+    ;;
         -A|--list-all)
         grep --color -E '[0-9]{12}' $LOG_FILE
         shift
